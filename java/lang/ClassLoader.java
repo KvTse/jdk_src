@@ -1431,12 +1431,22 @@ public abstract class ClassLoader {
      * delegation parent for new <tt>ClassLoader</tt> instances, and is
      * typically the class loader used to start the application.
      *
+     * 返回用于委托的系统类加载器,这是一个对于新类加载器实例默认的委托双亲.
+     * 它通常是用于启动应用的类加载器.
+     * 注:就是我们所写的代码,通常情况下是它来加载的.
+     *
      * <p> This method is first invoked early in the runtime's startup
      * sequence, at which point it creates the system class loader and sets it
      * as the context class loader of the invoking <tt>Thread</tt>.
      *
+     * 这个方法在运行时启动序列早期第一次被调用,在那个时间点,它创建系统类加载器
+     * 并将其设置为调用线程的上下文类加载器.
+     * 注:在返回之前,它会创建系统类加载器.
+     *
      * <p> The default system class loader is an implementation-dependent
      * instance of this class.
+     *
+     * 默认的系统类加载器是一个依赖于ClassLoader类的实例.
      *
      * <p> If the system property "<tt>java.system.class.loader</tt>" is defined
      * when this method is first invoked then the value of that property is
@@ -1448,6 +1458,12 @@ public abstract class ClassLoader {
      * class loader as the parameter.  The resulting class loader is defined
      * to be the system class loader.
      *
+     * 如果系统属性"java.system.class.loader"在这个方法第一次被调用的时候被定义了
+     * 那么这个属性的值将被当作系统类加载器的名称被返回.这个类被默认的系统类加载器
+     * 加载且须要定义一个包含单一参数类型为ClassLoader的public 构造器,参数ClassLoader
+     * 将被当作委托的双亲.之后利用这个带参构造器,加上默认的系统类加载器作为参数创建一个实例
+     * 返回的类加载器,就被定义成了系统类加载器.
+     *
      * <p> If a security manager is present, and the invoker's class loader is
      * not <tt>null</tt> and the invoker's class loader is not the same as or
      * an ancestor of the system class loader, then this method invokes the
@@ -1458,6 +1474,9 @@ public abstract class ClassLoader {
      * <tt>RuntimePermission("getClassLoader")</tt>} permission to verify
      * access to the system class loader.  If not, a
      * <tt>SecurityException</tt> will be thrown.  </p>
+     *
+     * 如果有安全管理,而且调用类加载器非空,且调用类加载器与系统类加载器不同或者
+     * 有不同的祖先,那么这个方法以安全管理的实行被调用.
      *
      * @return  The system <tt>ClassLoader</tt> for delegation, or
      *          <tt>null</tt> if none
@@ -1483,6 +1502,7 @@ public abstract class ClassLoader {
      */
     @CallerSensitive
     public static ClassLoader getSystemClassLoader() {
+        // 初始化系统类加载器
         initSystemClassLoader();
         if (scl == null) {
             return null;
@@ -1495,9 +1515,11 @@ public abstract class ClassLoader {
     }
 
     private static synchronized void initSystemClassLoader() {
+        // 系统类加载器是否被设置,false没被设置
         if (!sclSet) {
             if (scl != null)
                 throw new IllegalStateException("recursive invocation");
+            // 获取Launcher实例
             sun.misc.Launcher l = sun.misc.Launcher.getLauncher();
             if (l != null) {
                 Throwable oops = null;
